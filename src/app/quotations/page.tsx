@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Quotation } from '@/types/quotation';
 
@@ -34,13 +35,31 @@ const getQuotationsFromMemory = (): Quotation[] => {
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
 
-  // Fetch quotations from memory when the component mounts or updates
+ const router = useRouter(); // <-- ADD THIS LINE
+
   useEffect(() => {
     const fetchedQuotations = getQuotationsFromMemory();
     setQuotations(fetchedQuotations);
     console.log('QuotationsPage: Data fetched from memory:', fetchedQuotations); // Diagnostic log
   }, []); // Empty dependency array means this runs once on mount, and on re-mount by router.refresh()
+// Function to handle deleting a quotation
+  const handleDelete = (id: string) => {
+    // Update the in-memory array on the server-side context
+    global.quotations = global.quotations.filter(q => q.id !== id);
+    console.log('Quotation deleted. Current in-memory:', global.quotations);
 
+    // Update the component's local state to reflect the change
+    setQuotations(global.quotations); // Re-fetch from the (now modified) global array
+
+    // Force a refresh of the page to ensure Next.js cache is updated (good practice for App Router)
+    // router.refresh(); // Consider adding if you had a server component fetching data
+  };
+
+  // We'll implement handleEdit in the next step
+  const handleEdit = (id: string) => { router.push(`/quotations/${id}/edit`); // Navigate to the edit page with the quotation's ID
+    console.log(`Edit button clicked for quotation ID: ${id}`);
+    // This will navigate to an edit form page
+  };
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -69,7 +88,7 @@ export default function QuotationsPage() {
                 <TableHead className="text-right">Total Amount</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Status</TableHead>
-                {/* Add more heads for actions like Edit/Delete later */}
+                <TableHead>Actions</TableHead> 
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,7 +109,22 @@ export default function QuotationsPage() {
                       {quotation.status.charAt(0).toUpperCase() + quotation.status.slice(1)}
                     </span>
                   </TableCell>
-                  {/* Add more cells for actions later */}
+                 <TableCell className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleEdit(quotation.id)} // We'll implement handleEdit next
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive" // Shadcn/ui's red button style
+                  size="sm"
+                  onClick={() => handleDelete(quotation.id)} // We'll implement handleDelete next
+                >
+                  Delete
+                </Button>
+              </TableCell>
                 </TableRow>
               ))}
             </TableBody>
