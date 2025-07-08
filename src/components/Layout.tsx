@@ -19,6 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <li><Link href="/" className="hover:text-rs-light-teal">Home</Link></li>
             <li><Link href="/invoices" className="hover:text-rs-light-teal">Invoices</Link></li>
             <li><Link href="/receipts" className="hover:text-rs-light-teal">Receipts</Link></li>
+          <li><Link href="/quotations" className="hover:text-rs-light-teal">Quotations</Link></li>
           </ul>
         </nav>
       </header>
