@@ -98,6 +98,8 @@ export default function NewQuotationPage() {
 
     // Simulate API call
     addQuotationToMemory(newQuotation);
+ router.refresh();
+
 
     // Redirect to the quotations list page
     router.push('/quotations');
@@ -145,7 +147,7 @@ export default function NewQuotationPage() {
                 <FormItem>
                   <FormLabel>Quantity</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} />
+                    <Input type="number" {...field} onChange={e => field.onChange(e.target.value)} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +161,7 @@ export default function NewQuotationPage() {
                 <FormItem>
                   <FormLabel>Unit Price</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} onChange={e => field.onChange(e.target.valueAsNumber)} />
+                    <Input type="number" {...field} onChange={e => field.onChange(e.target.value)} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
