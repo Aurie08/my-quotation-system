@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* Any other global styles you have or add later */
-@import "tailwindcss";
+/*@import "tailwindcss";*/
 
 :root {
   --background: #ffffff;
