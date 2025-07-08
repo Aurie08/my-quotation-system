@@ -1,9 +1,6 @@
 // src/app/layout.tsx
 import './globals.css';
-import { Inter } from 'next/font/google';
-import Layout from '../components/Layout'; // Make sure this path is correct based on your file name (e.g., '../components/Layout' if it's Layout.js)
-
-const inter = Inter({ subsets: ['latin'] });
+import Layout from '../components/Layout';
 
 export const metadata = {
   title: 'Rydberg Starck Quotation System',
@@ -17,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body>
         <Layout>
           {children}
         </Layout>

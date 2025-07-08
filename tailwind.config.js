@@ -2,20 +2,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './pages/**/*.{js,ts,jsx,tsx,mdx}', // For files in the 'pages' directory (if you use it)
-    './components/**/*.{js,ts,jsx,tsx,mdx}', // For files in the 'components' directory
-    './app/**/*.{js,ts,jsx,tsx,mdx}', // For files in the 'app' directory (where your pages are now)
-    // You can add more paths here if you create other folders for Tailwind-reliant files
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
     extend: {
       colors: {
-        'rs-dark-navy': '#111C24',
-        'rs-teal-green': '#126262',
-        'rs-light-teal': '#0E8285',
+        'rs-dark-navy': '#111C24', // RGB 17-28-36 [cite: 94, 95]
+        'rs-teal-green': '#126262', // RGB 18-98-98 [cite: 98, 99]
+        'rs-light-teal': '#0E8285', // RGB 14-130-133 [cite: 107]
       },
       fontFamily: {
-        // gilroy: ['Gilroy', 'sans-serif'],
+        // We'll add Gilroy here later
       },
     },
   },

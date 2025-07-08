@@ -1,10 +1,13 @@
-// src/components/Layout.js
+// src/components/Layout.tsx
 
 import React from 'react';
 import Link from 'next/link'; // Import Link for Next.js navigation
 
-// No interface props in .js
-const Layout = ({ children }) => { // Remove React.FC<LayoutProps> and direct type annotations
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-white font-sans text-rs-dark-navy flex flex-col">
       <header className="bg-rs-dark-navy text-white p-4 shadow-md">
