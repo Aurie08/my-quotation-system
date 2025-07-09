@@ -80,3 +80,130 @@
     @apply bg-background text-foreground;
   }
 }
+/* src/app/globals.css */
+
+@media print {
+  /* Hide common layout elements */
+  header, /* Assuming your main header/navbar is a <header> tag */
+  nav,    /* Assuming your navigation is within a <nav> tag */
+  footer, /* If you have a footer, hide it */
+  .no-print, /* A custom class you can add to any element to hide it */
+  .print\:hidden { /* Tailwind's print:hidden utility class */
+    display: none !important;
+  }
+
+  /* Adjust main content for print */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Ensure white background for print */
+  }
+
+  /* Ensure card/main content fills the page */
+  .container.mx-auto { /* Target the main container on your invoice view page */
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove shadows and borders that might not look good in print */
+  .shadow-lg, .border {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ensure text is black for readability */
+  h1, h2, h3, h4, h5, h6, p, span, div, table {
+    color: #000 !important;
+  }
+
+  /* For Shadcn cards, remove padding if you want edge-to-edge content */
+  .card-header, .card-content {
+    padding: 0 !important;
+  }
+}/* src/app/globals.css */
+
+@media print {
+  /* Hide common layout elements */
+  header, /* Assuming your main header/navbar is a <header> tag */
+  nav,    /* Assuming your navigation is within a <nav> tag */
+  footer, /* If you have a footer, hide it */
+  .no-print, /* A custom class you can add to any element to hide it */
+  .print\:hidden { /* Tailwind's print:hidden utility class */
+    display: none !important;
+  }
+
+  /* Adjust main content for print */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Ensure white background for print */
+  }
+
+  /* Ensure card/main content fills the page */
+  .container.mx-auto { /* Target the main container on your invoice view page */
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove shadows and borders that might not look good in print */
+  .shadow-lg, .border {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ensure text is black for readability */
+  h1, h2, h3, h4, h5, h6, p, span, div, table {
+    color: #000 !important;
+  }
+
+  /* For Shadcn cards, remove padding if you want edge-to-edge content */
+  .card-header, .card-content {
+    padding: 0 !important;
+  }
+}/* src/app/globals.css */
+
+@media print {
+  /* Hide common layout elements */
+  header, /* Assuming your main header/navbar is a <header> tag */
+  nav,    /* Assuming your navigation is within a <nav> tag */
+  footer, /* If you have a footer, hide it */
+  .no-print, /* A custom class you can add to any element to hide it */
+  .print\:hidden { /* Tailwind's print:hidden utility class */
+    display: none !important;
+  }
+
+  /* Adjust main content for print */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #fff; /* Ensure white background for print */
+  }
+
+  /* Ensure card/main content fills the page */
+  .container.mx-auto { /* Target the main container on your invoice view page */
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Remove shadows and borders that might not look good in print */
+  .shadow-lg, .border {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Ensure text is black for readability */
+  h1, h2, h3, h4, h5, h6, p, span, div, table {
+    color: #000 !important;
+  }
+
+  /* For Shadcn cards, remove padding if you want edge-to-edge content */
+  .card-header, .card-content {
+    padding: 0 !important;
+  }
+}
