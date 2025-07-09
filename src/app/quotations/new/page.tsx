@@ -29,6 +29,7 @@ import {
 
 // Import your Quotation type
 import { Quotation } from '@/types/quotation';
+import { addQuotationToLocalStorage } from '@/lib/quotation-storage';
 
 // --- TEMPORARY IN-MEMORY STORAGE ---
 // In a real application, this would be an API call to a backend/database.
@@ -97,7 +98,7 @@ export default function NewQuotationPage() {
     console.log('Submitting new quotation:', newQuotation);
 
     // Simulate API call
-    addQuotationToMemory(newQuotation);
+    addQuotationToLocalStorage(newQuotation);
  router.refresh();
 
 

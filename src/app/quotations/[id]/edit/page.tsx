@@ -1,8 +1,8 @@
 // src/app/quotations/[id]/edit/page.tsx
 'use client';
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react'; // Add useState for loading state
+import { useRouter, useParams } from 'next/navigation'; // Import useParams
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,27 +29,15 @@ import {
 // Import your Quotation type
 import { Quotation } from '@/types/quotation';
 
-// --- TEMPORARY IN-MEMORY STORAGE ---
-// Make sure this matches the declaration in other pages
-declare global {
-  var quotations: Quotation[];
-}
-if (!global.quotations) {
-  global.quotations = [];
-}
-const getQuotationByIdFromMemory = (id: string): Quotation | undefined => {
-  return global.quotations.find(q => q.id === id);
-};
-const updateQuotationInMemory = (updatedQuotation: Quotation) => {
-  const index = global.quotations.findIndex(q => q.id === updatedQuotation.id);
-  if (index !== -1) {
-    global.quotations[index] = updatedQuotation;
-  }
-  console.log('Quotation updated. Current in-memory:', global.quotations);
-};
-// --- END TEMPORARY STORAGE ---
+// Import the localStorage utility functions
+// Make sure this path is correct: src/lib/quotation-storage.ts
+import {
+  getQuotationByIdFromLocalStorage,
+  updateQuotationInLocalStorage,
+} from '@/lib/quotation-storage';
 
-// Define the form schema using Zod for validation (same as new/page.tsx)
+// Define the form schema using Zod for validation
+// Using z.preprocess to handle number conversions from string inputs
 const formSchema = z.object({
   customerName: z.string().min(2, {
     message: 'Customer name must be at least 2 characters.',
@@ -57,26 +45,24 @@ const formSchema = z.object({
   itemDescription: z.string().min(5, {
     message: 'Item description must be at least 5 characters.',
   }),
-  quantity: z.coerce.number().min(1, {
-    message: 'Quantity must be at least 1.',
-  }),
-  unitPrice: z.coerce.number().min(0.01, {
-    message: 'Unit price must be greater than 0.',
-  }),
+  quantity: z.preprocess(
+    (val) => (val === '' ? undefined : Number(val)), // Handle empty string to undefined then number
+    z.number().min(1, { message: 'Quantity must be at least 1.' })
+  ),
+  unitPrice: z.preprocess(
+    (val) => (val === '' ? undefined : Number(val)), // Handle empty string to undefined then number
+    z.number().min(0.01, { message: 'Unit price must be greater than 0.' })
+  ),
   status: z.enum(['pending', 'approved', 'rejected'], {
     message: 'Please select a valid status.',
   }),
 });
 
-interface EditQuotationPageProps {
-  params: {
-    id: string; // The ID will come from the dynamic route segment
-  };
-}
-
-export default function EditQuotationPage({ params }: EditQuotationPageProps) {
+export default function EditQuotationPage() {
   const router = useRouter();
-  const quotationId = params.id;
+  const { id } = useParams(); // Get the ID from the route parameters
+  const [loading, setLoading] = useState(true); // State to manage loading status
+  const [initialQuotation, setInitialQuotation] = useState<Quotation | null>(null); // Store the fetched quotation
 
   // Initialize the form with zodResolver
   const form = useForm<z.infer<typeof formSchema>>({
@@ -84,46 +70,78 @@ export default function EditQuotationPage({ params }: EditQuotationPageProps) {
     defaultValues: {
       customerName: '',
       itemDescription: '',
-      quantity: 1,
-      unitPrice: 0.01,
+      quantity: 1, // Default for number input
+      unitPrice: 0.01, // Default for number input
       status: 'pending',
     },
   });
 
   // Load existing quotation data when the component mounts
   useEffect(() => {
-    const existingQuotation = getQuotationByIdFromMemory(quotationId);
-    if (existingQuotation) {
-      form.reset({
-        customerName: existingQuotation.customerName,
-        itemDescription: existingQuotation.itemDescription,
-        quantity: existingQuotation.quantity,
-        unitPrice: existingQuotation.unitPrice,
-        status: existingQuotation.status,
-      });
+    // Only attempt to fetch if id is a string (means it's available from useParams)
+    if (typeof id === 'string') {
+      const foundQuotation = getQuotationByIdFromLocalStorage(id);
+      if (foundQuotation) {
+        setInitialQuotation(foundQuotation); // Store for totalAmount calculation
+        form.reset({
+          customerName: foundQuotation.customerName,
+          itemDescription: foundQuotation.itemDescription,
+          quantity: foundQuotation.quantity,
+          unitPrice: foundQuotation.unitPrice,
+          status: foundQuotation.status,
+        });
+        console.log('EditQuotationPage: Loaded quotation data:', foundQuotation);
+      } else {
+        // If quotation not found, redirect to the list page
+        console.warn(`EditQuotationPage: Quotation with ID ${id} not found. Redirecting.`);
+        router.push('/quotations');
+      }
     } else {
-      // If quotation not found (e.g., direct navigation or deleted), redirect
-      router.push('/quotations');
+      console.log('EditQuotationPage: ID is not a string (initial render or missing). ID:', id);
+      // Optional: You might want to redirect immediately if ID is unexpectedly missing
+      // router.push('/quotations');
     }
-  }, [quotationId, form, router]); // Depend on id and form instance
+    setLoading(false); // Set loading to false once data attempt is complete
+  }, [id, form, router]); // Depend on id, form instance, and router
 
-  // Watch quantity and unitPrice to calculate totalAmount
+  // Watch quantity and unitPrice to calculate totalAmount dynamically
+  // Use a stable value for the watch to avoid re-renders if not truly changed
   const quantity = form.watch('quantity');
   const unitPrice = form.watch('unitPrice');
-  const totalAmount = (quantity * unitPrice).toFixed(2);
+
+  // Calculate totalAmount based on watched values, with a fallback for initial render
+  const calculatedTotalAmount = (Number(quantity || 0) * Number(unitPrice || 0));
+
+  // If loading, display a loading message
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 text-center text-lg font-semibold">
+        Loading quotation for editing...
+      </div>
+    );
+  }
+
+  // If after loading, no initial quotation was found, don't render the form
+  // The useEffect handles redirection, but this prevents flickering of an empty form
+  if (!initialQuotation && !loading) {
+    return null; // The redirect will handle this.
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Re-calculate totalAmount based on final form values to ensure accuracy
+    const finalTotalAmount = (values.quantity * values.unitPrice);
+
     const updatedQuotation: Quotation = {
-      id: quotationId, // Use the existing ID
+      id: typeof id === 'string' ? id : '', // Use the existing ID, ensure it's a string
       ...values,
-      totalAmount: parseFloat(totalAmount),
-      date: new Date().toISOString().split('T')[0], // Keep current date or reuse original
+      totalAmount: parseFloat(finalTotalAmount.toFixed(2)), // Ensure 2 decimal places and convert to number
+      date: initialQuotation?.date || new Date().toISOString().split('T')[0], // Keep original date or use current
     };
 
-    console.log('Updating quotation:', updatedQuotation);
-    updateQuotationInMemory(updatedQuotation);
+    console.log('Attempting to update quotation:', updatedQuotation);
+    updateQuotationInLocalStorage(updatedQuotation);
 
-    router.refresh(); // Invalidate cache for the list page
+    router.refresh(); // Invalidate cache for the list page if it were a server component
     router.push('/quotations'); // Redirect back to the list
   }
 
@@ -169,7 +187,13 @@ export default function EditQuotationPage({ params }: EditQuotationPageProps) {
                 <FormItem>
                   <FormLabel>Quantity</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChange={e => field.onChange(e.target.value)} />
+                    {/* field.value should be number, but Input expects string. Convert here. */}
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value ?? ''} // Ensure input is controlled, handle undefined
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,7 +207,14 @@ export default function EditQuotationPage({ params }: EditQuotationPageProps) {
                 <FormItem>
                   <FormLabel>Unit Price</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} onChange={e => field.onChange(e.target.value)} />
+                    {/* field.value should be number, but Input expects string. Convert here. */}
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      value={field.value ?? ''} // Ensure input is controlled, handle undefined
+                      onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -216,7 +247,7 @@ export default function EditQuotationPage({ params }: EditQuotationPageProps) {
             <FormItem>
               <FormLabel>Total Amount</FormLabel>
               <FormControl>
-                <Input value={totalAmount} readOnly className="font-bold bg-gray-50 cursor-not-allowed" />
+                <Input value={calculatedTotalAmount.toFixed(2)} readOnly className="font-bold bg-gray-50 cursor-not-allowed" />
               </FormControl>
             </FormItem>
           </div> {/* End grid */}

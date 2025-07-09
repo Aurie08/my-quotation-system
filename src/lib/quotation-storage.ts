@@ -1,6 +1,6 @@
 // src/lib/quotation-storage.ts
 import { Quotation } from '@/types/quotation';
-import { v4 as uuidv4 } from 'uuid'; // Ensure uuid is installed: npm install uuid @types/uuid
+import { v4 as uuidv4 } from 'uuid'; // Corrected import
 
 const QUOTATIONS_STORAGE_KEY = 'quotations';
 
@@ -55,9 +55,6 @@ export const updateQuotationInLocalStorage = (updatedQuotation: Quotation): Quot
   const index = existingQuotations.findIndex(q => q.id === updatedQuotation.id);
 
   if (index !== -1) {
-    // Ensure totalAmount and date are correctly set/updated here as well if needed,
-    // though the form usually calculates totalAmount.
-    // For simplicity, we'll assume updatedQuotation has the correct totalAmount and date.
     existingQuotations[index] = updatedQuotation;
     saveQuotationsToLocalStorage(existingQuotations);
     return updatedQuotation;
@@ -77,42 +74,3 @@ export const deleteQuotationFromLocalStorage = (id: string): boolean => {
   }
   return false; // Quotation not found
 };
-
-// --- Seed Data for Development (Optional) ---
-// This will add some initial data if localStorage is empty
-if (getQuotationsFromLocalStorage().length === 0 && typeof window !== 'undefined') {
-  console.log("Seeding localStorage with initial quotation data for development.");
-  const initialQuotations: Quotation[] = [
-    {
-      id: uuidv4(),
-      customerName: 'Acme Corp',
-      itemDescription: 'Consulting Services',
-      quantity: 1,
-      unitPrice: 1500.00,
-      totalAmount: 1500.00,
-      status: 'approved',
-      date: '2025-06-15',
-    },
-    {
-      id: uuidv4(),
-      customerName: 'Globex Inc.',
-      itemDescription: 'Software License',
-      quantity: 5,
-      unitPrice: 200.00,
-      totalAmount: 1000.00,
-      status: 'pending',
-      date: '2025-06-20',
-    },
-    {
-      id: uuidv4(),
-      customerName: 'Umbrella Corp',
-      itemDescription: 'Hardware Installation',
-      quantity: 2,
-      unitPrice: 750.00,
-      totalAmount: 1500.00,
-      status: 'rejected',
-      date: '2025-06-25',
-    },
-  ];
-  saveQuotationsToLocalStorage(initialQuotations);
-}

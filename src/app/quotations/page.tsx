@@ -18,9 +18,13 @@ import {
 // Import your Quotation type
 import { Quotation } from '@/types/quotation';
 
-// Import the new localStorage utility functions
-// Make sure this path is correct: src/lib/quotation-storage.ts
-import { getQuotationsFromLocalStorage, deleteQuotationFromLocalStorage } from '@/lib/quotation-storage';
+// Import the localStorage utility functions and uuid for seeding
+import {
+  getQuotationsFromLocalStorage,
+  deleteQuotationFromLocalStorage,
+  saveQuotationsToLocalStorage, // <--- Add this import
+} from '@/lib/quotation-storage';
+import { v4 as uuidv4 } from 'uuid'; // <--- Add this import for seeding
 
 export default function QuotationsPage() {
   const router = useRouter();
@@ -37,8 +41,48 @@ export default function QuotationsPage() {
   };
 
   useEffect(() => {
-    fetchQuotations(); // Fetch data when component mounts
-  }, []);
+    // --- NEW Seeding Logic (moved from quotation-storage.ts) ---
+    // Only run this once on mount to seed data if localStorage is empty
+    if (typeof window !== 'undefined' && getQuotationsFromLocalStorage().length === 0) {
+      console.log("Seeding localStorage with initial quotation data for development from QuotationsPage.");
+      const initialQuotations: Quotation[] = [
+        {
+          id: uuidv4(),
+          customerName: 'Acme Corp',
+          itemDescription: 'Consulting Services',
+          quantity: 1,
+          unitPrice: 1500.00,
+          totalAmount: 1500.00,
+          status: 'approved',
+          date: '2025-06-15',
+        },
+        {
+          id: uuidv4(),
+          customerName: 'Globex Inc.',
+          itemDescription: 'Software License',
+          quantity: 5,
+          unitPrice: 200.00,
+          totalAmount: 1000.00,
+          status: 'pending',
+          date: '2025-06-20',
+        },
+        {
+          id: uuidv4(),
+          customerName: 'Umbrella Corp',
+          itemDescription: 'Hardware Installation',
+          quantity: 2,
+          unitPrice: 750.00,
+          totalAmount: 1500.00,
+          status: 'rejected',
+          date: '2025-06-25',
+        },
+      ];
+      saveQuotationsToLocalStorage(initialQuotations);
+    }
+    // --- End Seeding Logic ---
+
+    fetchQuotations(); // Always fetch data when component mounts or after seeding
+  }, []); // Empty dependency array means this runs once on mount
 
   // Handler for Edit button click
   const handleEdit = (id: string) => {
@@ -59,7 +103,7 @@ export default function QuotationsPage() {
     }
   };
 
-  // Handler for View button click (for the next step)
+  // Handler for View button click
   const handleView = (id: string) => {
     console.log('View button clicked for quotation ID:', id);
     router.push(`/quotations/${id}/view`);
@@ -120,7 +164,6 @@ export default function QuotationsPage() {
                     </span>
                   </TableCell>
                   <TableCell className="flex justify-center space-x-2">
-                    {/* New View Button */}
                     <Button
                       variant="outline"
                       size="sm"
